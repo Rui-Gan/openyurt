@@ -111,7 +111,7 @@ status:
   loadBalancer:
       ingress:
       - hostname: hangzhou
-        ip: 172.18.0.20
+        ip: 172.18.0.21
       - hostname: shanghai
         ip: 172.18.0.30
 ```
