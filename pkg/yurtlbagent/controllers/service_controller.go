@@ -79,12 +79,15 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		klog.Errorf(Format("Get Service %s/%s error %v", req.Namespace, req.Name, err))
 		return ctrl.Result{}, err
 	}
+	klog.Infof(Format("Get Service  %s/%s", req.Namespace, req.Name))
 
 	// filter loadbalancerclass
 	if filterByLoadBalancerClass(service, r.LoadBalancerClass) {
 		klog.Infof(Format("filter Service %s/%s by LoadBalancerClass %s", req.Namespace, req.Name, r.LoadBalancerClass))
 		return ctrl.Result{}, nil
 	}
+
+	klog.Infof(Format("not filter Service  %s/%sby LoadBalancerClass %s", req.Namespace, req.Name, r.LoadBalancerClass))
 
 	if service.DeletionTimestamp != nil {
 		return r.reconcileDelete(ctx, service)
@@ -167,6 +170,15 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager, opts *options.Yur
 					return false
 				}
 				return !equality.Semantic.DeepEqual(oldService.Status, newService.Status)
+			},
+			CreateFunc: func(ce event.CreateEvent) bool {
+				return true
+			},
+			DeleteFunc: func(de event.DeleteEvent) bool {
+				return true
+			},
+			GenericFunc: func(ge event.GenericEvent) bool {
+				return true
 			},
 		}).
 		Watches(&source.Kind{Type: &discovery.EndpointSlice{}},
